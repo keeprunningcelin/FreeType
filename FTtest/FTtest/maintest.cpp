@@ -1,33 +1,64 @@
 #include "CvxText.h"
 #include<vector>
 
-void main()
+cv::Mat getCanvas(const cv::Mat& inputImage, const std::vector<std::string>& Msgs)
 {
-	// 打开一幅
-	//IplImage *img = cvLoadImage("lena.jpg");
-	cv::Mat img = cv::imread("lena.jpg");
+	CV_Assert(inputImage.data && inputImage.type() == CV_8UC3);
+
+	int numMsgs = (int)Msgs.size();
+	int inputImageHeight = inputImage.rows;
+	int inputImageWidth = inputImage.cols;
+	int msgHeight = 22;
+	int msgWidth = 20;
+	int allMsgsHeight = msgHeight * numMsgs;
+	int allMsgsWidth = msgWidth * 5;//根据每一行内容的多少可做相应修改
+	int outputImageHeight = inputImageHeight > allMsgsHeight ? inputImageHeight : allMsgsHeight;
+	int outputImageWidth = inputImageWidth + allMsgsWidth;
 	
-	// 输出汉字
+	cv::Mat outputImage(outputImageHeight, outputImageWidth, CV_8UC3,cv::Scalar(0,0,0));
+
+	for (int r = 0; r < inputImageHeight; r++)
 	{
-		CvxText text("C:\\Windows\\Fonts\\simhei.ttf"); // "zenhei.ttf"为黑体常规
-		std::vector<std::string> msgs;
-		msgs.push_back("在OpenCV中输出汉字! 123abcdefghpygq");
-		msgs.push_back("在OpenCV中输出汉字! 123abcdefghpygq");
-		msgs.push_back("在OpenCV中输出汉字! 123abcdefghpygq");
-		//const char *msg = "在OpenCV中输出汉字!123abcdefghpygq";
-
-		float p = 0.9;
-		text.setFont(NULL, NULL, NULL, &p);   // 透明处理
-		//text.putText(img, msg, cvPoint(100, 150), CV_RGB(0,255,0));
-		//text.putText(img, msg, cv::Point(100, 150), cv::Scalar(0, 255, 0));
-		text.putText(img, msgs, cv::Point(100, 150), cv::Scalar(0, 255, 0));
+		for (int c = 0; c < inputImageWidth; c++)
+		{
+			cv::Vec3b &val = outputImage.at<cv::Vec3b>(r, c);
+			cv::Vec3b val2 = inputImage.at<cv::Vec3b>(r, c);
+			for (int k = 0; k < 3; ++k)
+			{
+				val[k] =val2[k];
+			}
+		}
 	}
+	
+	return outputImage;
+	
+}
 
+void drawResults(const cv::Mat& inputImage, const std::vector<std::string>& Msgs, cv::Mat& outputImage)
+{
+	outputImage=getCanvas(inputImage, Msgs);
+	CvxText text("C:\\Windows\\Fonts\\simsun.ttc"); // "simsun.ttc"为宋体
+	float p = 0.9;
+	text.setFont(NULL, NULL, NULL, &p);   // 透明处理
+	text.putText(outputImage, Msgs, cv::Point(inputImage.cols + 10, 20), cv::Scalar(255, 255, 255));
+}
+
+int main()
+{
+	cv::Mat img = cv::imread("test.jpg");
+	std::vector<std::string> msgs;
+	cv::Mat outputImage;
+	msgs.push_back("天 0.8000");
+	msgs.push_back("大 0.0020");
+	msgs.push_back("三 0.0060");
+	msgs.push_back("大 0.0120");
+	msgs.push_back("三 0.0010");
+
+	// 输出汉字
+	drawResults(img, msgs, outputImage);
 	// 定义窗口，并显示影象
-	cv::imshow("test", img);
-	//cvShowImage("test", img );
+	cv::imshow("test", outputImage);
 	cvWaitKey(0);
-	//cvReleaseImage(&img);
 
 }
 

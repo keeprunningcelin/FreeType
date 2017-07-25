@@ -136,10 +136,7 @@ int CvxText::putText(cv::Mat &img, std::vector<std::string> text, cv::Point &pos
 	if (!img.data) return -1;
 	if (!text.size()) return -1;
 
-	int maxrow = 0;
-	int temp = 0;
 	int pos_x = pos.x;
-	
 	int i;
 	for (i = 0; i < text.size(); i++)
 	{
@@ -154,15 +151,11 @@ int CvxText::putText(cv::Mat &img, std::vector<std::string> text, cv::Point &pos
 			if (!isascii(wc)) mbtowc(&wc, &msg[i++], 2);
 
 			// 输出当前的字符
-			temp = putWChar(img, wc, pos, color);
-			if (maxrow < temp)
-			{
-				maxrow = temp;
-			}
+			putWChar(img, wc, pos, color);
 		}
 
 		pos.x = pos_x;
-		pos.y += maxrow + 2;
+		pos.y += 20;
 	}
 
 	return i;
